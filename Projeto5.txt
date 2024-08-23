@@ -1,0 +1,15 @@
+Sistema 5: 
+
+“Agendamento de Consultas”- Grupo 5 Visão Geral do Sistema: O sistema deve registrar e manter o cadastro de agendamentos de consulta de uma clínica veterinária. 
+Aos agendamentos são atribuídas informações do animal a ser atendido e, também, do veterinário responsável pelo agendamento. 
+
+Requisitos Funcionais: 
+R1- O sistema deve manter o cadastro de animais. As informações a serem guardadas são: codigo, nome do animal, raça e data de nascimento. 
+
+R2-O sistema deve manter o cadastro de veterinários. As informações a serem guardadas são: cpf do veterinário, nome do veterinário, data de nascimento e seu registro. 
+
+R3-O sistema deve manter o
+registro de agendamentos. Cada curso deve conter: código do agendamento, data do agendamento, horário do agendamento, 
+o veterinário responsável pelo atendimento e o animal a ser atendido. 
+
+R4-Validação: Ao registrar um agendamento é necessário verificar se não há outro agendamento na mesma data e horário.
