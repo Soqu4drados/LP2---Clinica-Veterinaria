@@ -112,6 +112,7 @@ public class Tutor extends JFrame {
             }
         } catch (NumberFormatException ex) {
             showError("Formato de CPF inválido. Por favor, insira um CPF válido.");
+            ex.printStackTrace();
         }
     }
 

@@ -7,12 +7,6 @@ public class App {
         SwingUtilities.invokeLater(() -> {
             new LoginWindow().setVisible(true);
         });
-        
-        /*
-        SwingUtilities.invokeLater(() -> {
-            new MainApplicationWindow().setVisible(true);
-        });
-*/
 
     }
 }

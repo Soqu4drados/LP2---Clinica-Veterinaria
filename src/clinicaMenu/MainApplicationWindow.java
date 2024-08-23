@@ -43,6 +43,7 @@ public class MainApplicationWindow extends JFrame {
         resultTable = new JTable(tableModel);
         dbTables = new JComboBox<>(new String[]{"", "Animal", "Agendamento", "Tutor", "Veterinario"});
         dbRows = new JComboBox<>();
+        
 
         // Create layout
         JPanel topPanel = new JPanel();
@@ -81,7 +82,7 @@ public class MainApplicationWindow extends JFrame {
 
             // Determine table type
             String tableType = (String) dbTables.getSelectedItem();
-
+            
             // Open respective editor with row data
             openEditor(tableType, rowData);
         }
@@ -122,22 +123,29 @@ public class MainApplicationWindow extends JFrame {
         }
 
         String searchQuery = buildSearchQuery(selectedTable);
+        
         if (searchQuery == null) return; // Invalid table selected
 
+        System.out.println(searchQuery);
         try (Statement stmt = dbManager.createStatement();
              ResultSet rs = stmt.executeQuery(searchQuery)) {
 
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            // Clear existing data
+            // Clear existing data and columns
             tableModel.setRowCount(0);
             tableModel.setColumnCount(0);
 
             // Set column names
             Vector<String> columnNames = new Vector<>();
             for (int i = 1; i <= columnCount; i++) {
-                columnNames.add(metaData.getColumnName(i));
+                // Retrieve column label or fallback to column name
+                String columnName = metaData.getColumnLabel(i);
+                if (columnName == null || columnName.isEmpty()) {
+                    columnName = metaData.getColumnName(i);
+                }
+                columnNames.add(columnName);
             }
             tableModel.setColumnIdentifiers(columnNames);
 
@@ -149,35 +157,36 @@ public class MainApplicationWindow extends JFrame {
                 }
                 tableModel.addRow(rowData);
             }
+            
         } catch (SQLException e) {
-                // Create a stack trace string
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    e.printStackTrace(pw);
-    String stackTrace = sw.toString();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String stackTrace = sw.toString();
 
-    // Display a detailed error message including stack trace
-    JOptionPane.showMessageDialog(this, 
-        "Failed to retrieve data.\n\n" + stackTrace, 
-        "Error", 
-        JOptionPane.ERROR_MESSAGE);
+            // Display a detailed error message including stack trace
+            JOptionPane.showMessageDialog(this, 
+                "Failed to retrieve data.\n\n" + stackTrace, 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private String buildSearchQuery(String table) {
         String selectClause;
         switch (table) {
             case "Agendamento":
                 selectClause = "codigoAgendamento as Agendamento, dataagendamento as Data, horaagendamento as Hora, " +
-                        "veterinario as Veterinario, animal as Logradouro";
+                        "v.nome as Veterinario, a.nomeAnimal as Animal";
                 break;
             case "Veterinario":
                 selectClause = "registro as Registro, cpf as CPF, nome as Nome, " +
                         "datadenasc as 'Data De Nascimento', logradouro as Logradouro";
                 break;
             case "Animal":
-                selectClause = "cpfTutor as 'CPF do Tutor', codigo as Codigo, nomeAnimal as Nome, " +
-                        "datadenasc as 'Data De Nascimento', raca as Raça";
+                selectClause = "t.nome as 'Tutor', codigo as Codigo, nomeAnimal as Nome, " +
+                        "animal.datadenasc as 'Data De Nascimento', raca as 'Raça'";
                 break;
             case "Tutor":
                 selectClause = "nome as Nome, cpf as CPF, datadenasc as 'Data De Nascimento', logradouro as Logradouro";
@@ -185,10 +194,30 @@ public class MainApplicationWindow extends JFrame {
             default:
                 return null;
         }
+        
+        String joinClause;
+        switch (table) {
+        case "Agendamento":
+        	joinClause = " JOIN veterinario v ON agendamento.veterinario=v.registro"
+        			   + " JOIN animal a ON a.codigo=agendamento.animal ";
+            break;
+        case "Veterinario":
+        	joinClause = "";
+            break;
+        case "Animal":
+        	joinClause = " JOIN Tutor t ON t.cpf=animal.cpfTutor";
+            break;
+        case "Tutor":
+        	joinClause = "";
+        	break;
+        default:
+            return null;
+    }
 
         String whereClause = buildWhereClause(table);
-
-        return "SELECT " + selectClause + " FROM " + table + whereClause + ";";
+        
+        System.out.print("SELECT " + selectClause + " FROM " + table + joinClause + whereClause + ";");
+        return "SELECT " + selectClause + " FROM " + table + joinClause + whereClause + ";";
     }
 
     private String buildWhereClause(String table) {
@@ -400,14 +429,12 @@ private void openAgendaEditor(Vector<?> rowData) {
         }
 
         String veterinario = rowData.get(3).toString();
-        int animal = Integer.parseInt(rowData.get(4).toString());
-
+        //int animal = Integer.parseInt(rowData.get(4).toString());
+        String animal = rowData.get(4).toString();
+        
         new Agenda(dbManager, codigoAgendamento, dataAgendamento, horaAgendamento, veterinario, animal);
-    } catch (ParseException | IllegalArgumentException e) {
-        JOptionPane.showMessageDialog(this, "Error parsing data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-}
-
-
-
+    	} catch (ParseException | IllegalArgumentException e) {
+        	JOptionPane.showMessageDialog(this, "Error parsing data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    	}
+	}
 }

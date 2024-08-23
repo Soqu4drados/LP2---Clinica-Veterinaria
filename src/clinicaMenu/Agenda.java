@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +26,10 @@ public class Agenda extends JFrame {
     private int codigo;
 
     public Agenda(Connection dbManager) {
-        this(dbManager, 0, null, null, null, 0);
+        this(dbManager, 0, null, null, null, null);
     }
 
-    public Agenda(Connection dbManager, int codigoAgendamento, Date dataagendamento, Time horaagendamento, String veterinario, int animal) {
+    public Agenda(Connection dbManager, int codigoAgendamento, Date dataagendamento, Time horaagendamento, String veterinario, String animal) {
         this.dbManager = dbManager;
         this.codigo = codigoAgendamento;
 
@@ -102,7 +103,8 @@ public class Agenda extends JFrame {
             }
             veterinarioComboBox.setModel(model);
         } catch (SQLException e) {
-            showError("Erro ao Pesquisar em Veterinario: " + e.getMessage());
+            showError("Erro ao Pesquisar em Veterinario!");
+            e.printStackTrace();
         }
     }
 
@@ -119,7 +121,8 @@ public class Agenda extends JFrame {
             }
             animalComboBox.setModel(model);
         } catch (SQLException e) {
-            showError("Erro ao Pesquisar em Animal: " + e.getMessage());
+            showError("Erro ao Pesquisar em Animal!" );
+            e.printStackTrace();
         }
     }
 
@@ -138,7 +141,7 @@ public class Agenda extends JFrame {
 
         java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
         java.util.Date selectedTime = (java.util.Date) hourSpinner.getValue();
-        java.sql.Time sqlTime = new java.sql.Time(selectedTime.getTime());
+        java.sql.Time sqlTime = roundToNearestHalfHour(selectedTime.getTime());//new java.sql.Time(selectedTime.getTime());
 
         String selectedVeterinario = (String) veterinarioComboBox.getSelectedItem();
         String selectedAnimal = (String) animalComboBox.getSelectedItem();
@@ -167,7 +170,8 @@ public class Agenda extends JFrame {
                 }
             }
         } catch (SQLException e) {
-            showError("Erro ao Inserir no Banco de Dados: " + e.getMessage());
+            showError("Erro ao Inserir no Banco de Dados!" );
+            e.printStackTrace();
         }
     }
 
@@ -210,7 +214,8 @@ public class Agenda extends JFrame {
                 }
             }
         } catch (SQLException e) {
-            showError("Erro ao Atualizar no Banco de Dados: " + e.getMessage());
+            showError("Erro ao Atualizar no Banco de Dados!");
+            e.printStackTrace();
         }
     }
 
@@ -240,9 +245,33 @@ public class Agenda extends JFrame {
                     showError("Exclusão Falhou. Tente novamente.");
                 }
             } catch (SQLException e) {
-                showError("Erro ao Excluir do Banco de Dados: " + e.getMessage());
+                showError("Erro ao Excluir do Banco de Dados!");
+                e.printStackTrace();
             }
         }
+    }
+    
+    public static Time roundToNearestHalfHour(long timeMillis) {
+        // Cria uma instância de Calendar e define o tempo
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeMillis);
+
+        // Obtém os minutos atuais
+        int minutes = calendar.get(Calendar.MINUTE);
+
+        // Arredonda para 00 ou 30 minutos
+        if (minutes < 30) {
+            calendar.set(Calendar.MINUTE, 0);
+        } else {
+            calendar.set(Calendar.MINUTE, 30);
+        }
+
+        // Define os segundos e milissegundos como 0
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // Cria e retorna um novo objeto Time com a hora arredondada
+        return new Time(calendar.getTimeInMillis());
     }
 
     private void showError(String message) {

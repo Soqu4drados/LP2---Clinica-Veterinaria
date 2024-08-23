@@ -91,7 +91,8 @@ public class Animal extends JFrame {
             }
             cpfComboBox.setModel(model);
         } catch (SQLException e) {
-            showError("Erro ao Pesquisar em Tutor: " + e.getMessage());
+            showError("Erro ao Pesquisar em Tutor!" );
+            e.printStackTrace();
         }
     }
 
@@ -128,7 +129,8 @@ public class Animal extends JFrame {
                 showError("Inserção Falhou. Tente novamente.");
             }
         } catch (SQLException e) {
-            showError("Erro ao Inserir no Banco de Dados: " + e.getMessage());
+            showError("Erro ao Inserir no Banco de Dados!");
+            e.printStackTrace();
         }
     }
 
@@ -160,7 +162,8 @@ public class Animal extends JFrame {
                 showError("Atualização Falhou. Tente novamente.");
             }
         } catch (SQLException e) {
-            showError("Erro ao Atualizar no Banco de Dados: " + e.getMessage());
+            showError("Erro ao Atualizar no Banco de Dados!");
+            e.printStackTrace();
         }
     }
 
@@ -179,7 +182,8 @@ public class Animal extends JFrame {
                     showError("Exclusão Falhou. Tente novamente.");
                 }
             } catch (SQLException e) {
-                showError("Erro ao Excluir do Banco de Dados: " + e.getMessage());
+                showError("Erro ao Excluir do Banco de Dados! ");
+                e.printStackTrace();
             }
         }
     }
